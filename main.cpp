@@ -6,7 +6,7 @@
 class A {};
 
 int main() {
-    using var = std::variant<int, A, std::string>;
+    using var = std::variant<int, std::string>;
 
     VariantContainer<var> container{};
     container.push_back(12);
@@ -21,9 +21,7 @@ int main() {
     container.push_back(std::string("ea"));
     container.push_back(std::string("fa"));
 
-    for (auto it = container.begin<std::string>(); it != container.end<std::string>(); it++) {
-        std::cout << *it << std::endl;
-    }
+    container.forEach([](auto a){ std::cout << a << std::endl; });
 
     return 0;
 }

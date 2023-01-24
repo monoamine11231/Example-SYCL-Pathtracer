@@ -28,11 +28,11 @@ static constexpr std::size_t variant_index() {
 /*  Raise out of bounds exception if given type not in variant and return the 
     type index in variant otherwise */
 template <typename V, typename T>
-static std::size_t assert_in_variant() {
+static constexpr std::size_t assert_in_variant() {
     /* Check if type is defined in the container variant */
-    const std::size_t variant_size  = std::variant_size_v<V>;
-    const std::size_t T_index       = variant_index<V, T>();
-    if (T_index >= variant_size)    {
+    constexpr std::size_t variant_size  = std::variant_size_v<V>;
+    constexpr std::size_t T_index       = variant_index<V, T>();
+    if constexpr(T_index >= variant_size)    {
         throw std::out_of_range("Unexpected variant type given");
     }
 
@@ -45,12 +45,12 @@ static std::size_t assert_in_variant() {
     iterator and overwriting the comparison, increment and dereferecing 
     operators with respect to the `std::variant` and the choosen unwrapping
     type to be used with `std::get<T>()`.  */
-template<typename T, typename VARIANT>
+template<std::size_t T, typename VARIANT>
 struct variant_iterator {
 public:
     variant_iterator(typename std::vector<VARIANT>::iterator it) : _it(it) {};
 
-    T operator*() {
+    auto operator*() {
         return std::get<T>(*(this->_it));
     }
 
@@ -89,16 +89,56 @@ public:
 
     template <typename T>
     auto begin() {
-        std::size_t T_index = assert_in_variant<VARIANT, T>();
+        constexpr std::size_t T_index = assert_in_variant<VARIANT, T>();
+        auto&& beg_it = this->_data.at(T_index).begin();
 
-        return variant_iterator<T, VARIANT>(this->_data.at(T_index).begin());
+        return variant_iterator<T_index, VARIANT>(beg_it);
     }
 
     template <typename T>
     auto end() {
-        std::size_t T_index = assert_in_variant<VARIANT, T>();
+        constexpr std::size_t T_index = assert_in_variant<VARIANT, T>();
+        auto&& end_it = this->_data.at(T_index).end();
 
-        return variant_iterator<T, VARIANT>(this->_data.at(T_index).end()); 
+        return variant_iterator<T_index, VARIANT>(end_it); 
+    }
+
+    /*  Because `std::get<T>` in `variant_iterator` has to accept a constexpr
+        index we cannot simply use a for loop through to go through all types
+        in the given variant and call the function we want. (NOTE that `F func`
+        is a lambda function and not a function pointer because SYCL does not
+        support that.) So instead of having to write a for loop for each type
+        in the given variant manually, we let the compiler do that for us :)
+        
+        Example with given variant: `std::variant<std::string, double, int>`:
+            `container.forEach(lambda)` expands at compile time to:
+            
+            for(auto it = variant_iterator<std::string>; it != end; i++) {
+                lambda(*it);
+            }
+             
+            for(auto it = variant_iterator<double>; it != end; i++) {
+                lambda(*it);
+            }
+
+            for(auto it = variant_iterator<int>; it != end; i++) {
+                lambda(*it);
+            }                                                               */
+    template <typename F, std::size_t I = 0>
+    void forEach(F&& func) {
+        if constexpr(I < std::variant_size_v<VARIANT>) {
+            auto&& begin_it = this->_data.at(I).begin();
+            auto&& end_it = this->_data.at(I).end();
+
+            auto it = variant_iterator<I, VARIANT>(begin_it);
+            auto end = variant_iterator<I, VARIANT>(end_it);
+            for (; it != end; it++) {
+                func(*it);
+            }
+            forEach<F, I+1>(std::forward<F>(func));
+        } else {
+            return;
+        }
     }
 
     template <typename T>

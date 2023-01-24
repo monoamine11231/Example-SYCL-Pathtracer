@@ -11,5 +11,5 @@ add_executable(pathtracer
 
 
 find_package(RapidObj REQUIRED HINTS $ENV{HOME}/local/cmake)
-target_compile_options(pathtracer PRIVATE -std=c++17 -Isrc/ -Wall -Wextra -g)
+target_compile_options(pathtracer PRIVATE -fsycl -std=c++17 -Isrc/ -Wall -Wextra -g)
 target_link_libraries(pathtracer PRIVATE rapidobj::rapidobj)
