@@ -6,9 +6,10 @@ project(pathtracer
     LANGUAGES CXX)
 
 add_executable(pathtracer
-    main.cpp)
+    main.cpp
+    include/VariantContainer.hpp)
 
 
 find_package(RapidObj REQUIRED HINTS $ENV{HOME}/local/cmake)
-target_compile_options(pathtracer PRIVATE -Isrc/ -Wall -Wextra -g)
+target_compile_options(pathtracer PRIVATE -std=c++17 -Isrc/ -Wall -Wextra -g)
 target_link_libraries(pathtracer PRIVATE rapidobj::rapidobj)
