@@ -46,29 +46,29 @@ static constexpr std::size_t assert_in_variant() {
     operators with respect to the `std::variant` and the choosen unwrapping
     type to be used with `std::get<T>()`.  */
 template<std::size_t T, typename VARIANT>
-struct variant_iterator {
+struct VariantIterator {
 public:
-    variant_iterator(typename std::vector<VARIANT>::iterator it) : _it(it) {};
+    VariantIterator(typename std::vector<VARIANT>::iterator it) : it_(it) {};
 
     auto operator*() {
-        return std::get<T>(*(this->_it));
+        return std::get<T>(*(this->it_));
     }
 
     void operator++(int a) {
-        this->_it++;
+        this->it_++;
     }
 
-    bool operator==(const variant_iterator& v_it) {
-        return this->_it==v_it._it;
+    bool operator==(const VariantIterator& v_it) {
+        return this->it_==v_it.it_;
     }
 
-    bool operator!=(const variant_iterator& v_it) {
-        return !(this->_it==v_it._it);
+    bool operator!=(const VariantIterator& v_it) {
+        return !(this->it_==v_it.it_);
     }
 
 private:
     /* The target vector iterator */
-    typename std::vector<VARIANT>::iterator _it;
+    typename std::vector<VARIANT>::iterator it_;
 };
 
 
@@ -92,7 +92,7 @@ public:
         constexpr std::size_t T_index = assert_in_variant<VARIANT, T>();
         auto&& beg_it = this->_data.at(T_index).begin();
 
-        return variant_iterator<T_index, VARIANT>(beg_it);
+        return VariantIterator<T_index, VARIANT>(beg_it);
     }
 
     template <typename T>
@@ -100,7 +100,7 @@ public:
         constexpr std::size_t T_index = assert_in_variant<VARIANT, T>();
         auto&& end_it = this->_data.at(T_index).end();
 
-        return variant_iterator<T_index, VARIANT>(end_it); 
+        return VariantIterator<T_index, VARIANT>(end_it); 
     }
 
     /*  Because `std::get<T>` in `variant_iterator` has to accept a constexpr
@@ -130,8 +130,8 @@ public:
             auto&& begin_it = this->_data.at(I).begin();
             auto&& end_it = this->_data.at(I).end();
 
-            auto it = variant_iterator<I, VARIANT>(begin_it);
-            auto end = variant_iterator<I, VARIANT>(end_it);
+            auto it = VariantIterator<I, VARIANT>(begin_it);
+            auto end = VariantIterator<I, VARIANT>(end_it);
             for (; it != end; it++) {
                 func(*it);
             }

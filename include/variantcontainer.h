@@ -1,9 +1,9 @@
-#ifndef VARIANTCONTAINER_HPP
-#define VARIANTCONTAINER_HPP
+#ifndef PATHTRACER_INCLUDE_VARIANTCONTAINER_H_
+#define PATHTRACER_INCLUDE_VARIANTCONTAINER_H_
 
 
 /*  Includes the implementation but template implementation code cannot be 
     put inside a standard `.cpp` file, so let's do this instead. */
-#include "VariantContainer.tcc"
+#include "variantcontainer.inc"
 
 #endif

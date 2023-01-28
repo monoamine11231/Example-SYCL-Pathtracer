@@ -6,10 +6,10 @@ project(pathtracer
     LANGUAGES CXX)
 
 add_executable(pathtracer
-    main.cpp
-    include/VariantContainer.hpp)
+    main.cc
+    include/variantcontainer.h)
 
-
+target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include)
 find_package(RapidObj REQUIRED HINTS $ENV{HOME}/local/cmake)
 target_compile_options(pathtracer PRIVATE -fsycl -std=c++17 -Isrc/ -Wall -Wextra -g)
 target_link_libraries(pathtracer PRIVATE rapidobj::rapidobj)
