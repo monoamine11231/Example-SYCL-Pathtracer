@@ -2,7 +2,7 @@
 #define PATHTRACER_INCLUDE_OBJECTS_PLANE_H_
 
 #include <sycl/sycl.hpp>
-#include "ray.h"
+#include "include/ray.h"
 
 
 class Plane {
@@ -16,7 +16,7 @@ public:
     Plane(sycl::vec<float, 3> point, sycl::vec<float, 3> normal, uint8_t material_id)
         : point_(point), normal_(normal), material_id_(material_id) {};
 
-    std::optional<Intersector> intersect(const Ray& ray);
+    std::optional<Intersector> Intersect(const Ray& ray) const;
 };
 
 #endif

@@ -2,7 +2,7 @@
 #define PATHTRACER_INCLUDE_MATERIAL_H_
 
 #include <sycl/sycl.hpp>
-#include "rapidobj.hpp"
+#include "rapidobj/rapidobj.hpp"
 
 
 struct Material {                       /* Filament standard model material props */

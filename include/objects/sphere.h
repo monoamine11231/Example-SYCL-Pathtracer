@@ -2,7 +2,7 @@
 #define PATHTRACER_INCLUDE_OBJECTS_SPHERE_H_
 
 #include <sycl/sycl.hpp>
-#include "ray.h"
+#include "include/ray.h"
 
 
 class Sphere {
@@ -16,7 +16,7 @@ public:
     Sphere(sycl::vec<float, 3> origin, float radius, uint8_t material_id)
         : origin_(origin), radius_(radius), material_id_(material_id) {};
 
-    std::optional<Intersector> intersect(const Ray& ray);
+    std::optional<Intersector> Intersect(const Ray& ray) const;
 };
 
 #endif

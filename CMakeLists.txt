@@ -10,9 +10,10 @@ project(pathtracer
 add_executable(pathtracer
     main.cc
     src/camera.cc
+    src/objects/mesh.cc
     include/variantcontainer.h)
 
-target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include)
+target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include ${HOME}/local/include/)
 find_package(RapidObj REQUIRED HINTS $ENV{HOME}/local/cmake)
 target_compile_options(pathtracer PRIVATE -fsycl -std=c++17 -I./ -Wall -Wextra -g)
 target_link_libraries(pathtracer PRIVATE rapidobj::rapidobj)
