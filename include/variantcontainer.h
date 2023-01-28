@@ -4,6 +4,6 @@
 
 /*  Includes the implementation but template implementation code cannot be 
     put inside a standard `.cpp` file, so let's do this instead. */
-#include "variantcontainer.inc"
+#include "src/variantcontainer.inc"
 
 #endif
