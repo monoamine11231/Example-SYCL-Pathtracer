@@ -11,6 +11,8 @@ add_executable(pathtracer
     main.cc
     src/camera.cc
     src/objects/mesh.cc
+    src/objects/plane.cc
+    src/objects/sphere.cc
     include/variantcontainer.h)
 
 target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include ${HOME}/local/include/)
