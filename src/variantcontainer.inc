@@ -25,6 +25,22 @@ static constexpr std::size_t variant_index() {
     }
 }
 
+/*  Single object `std::variant` unwrap with generic lambda. If same lambda needs
+    to be operated on all items of `VariantContainer` then `VariantContainer::forEach`
+    should be used instead. */
+template <typename F, typename V, std::size_t I = 0>
+static void variant_unwrap(F&& func, V& obj) {
+    if constexpr(I < std::variant_size_v<V>) {
+        if (obj.index() == I) {
+            func(std::get<I>(obj));
+        } else {
+            variant_unwrap<F, V, I+1>(std::forward<F>(func), obj);
+        }
+    } else {
+        __builtin_unreachable();
+    }
+}
+
 /*  Raise out of bounds exception if given type not in variant and return the 
     type index in variant otherwise */
 template <typename V, typename T>
@@ -83,14 +99,15 @@ template<typename VARIANT>
 class VariantContainer {
 private:
     /* Holding an individual vector for each type */
-    std::array<std::vector<VARIANT>, std::variant_size_v<VARIANT>> _data;
+    std::array<std::vector<VARIANT>, std::variant_size_v<VARIANT>> data_;
+    std::vector<std::pair<std::size_t, std::size_t>> index_map_;
 public:
     VariantContainer() {}
 
     template <typename T>
     auto begin() {
         constexpr std::size_t T_index = assert_in_variant<VARIANT, T>();
-        auto&& beg_it = this->_data.at(T_index).begin();
+        auto&& beg_it = this->data_.at(T_index).begin();
 
         return VariantIterator<T_index, VARIANT>(beg_it);
     }
@@ -98,7 +115,7 @@ public:
     template <typename T>
     auto end() {
         constexpr std::size_t T_index = assert_in_variant<VARIANT, T>();
-        auto&& end_it = this->_data.at(T_index).end();
+        auto&& end_it = this->data_.at(T_index).end();
 
         return VariantIterator<T_index, VARIANT>(end_it); 
     }
@@ -127,8 +144,8 @@ public:
     template <typename F, std::size_t I = 0>
     void forEach(F&& func) {
         if constexpr(I < std::variant_size_v<VARIANT>) {
-            auto&& begin_it = this->_data.at(I).begin();
-            auto&& end_it = this->_data.at(I).end();
+            auto&& begin_it = this->data_.at(I).begin();
+            auto&& end_it = this->data_.at(I).end();
 
             auto it = VariantIterator<I, VARIANT>(begin_it);
             auto end = VariantIterator<I, VARIANT>(end_it);
@@ -146,7 +163,14 @@ public:
         std::size_t T_index = assert_in_variant<VARIANT, T>();
 
         /* Return the data from the corresponding vector */
-        return this->_data.at(T_index).at(index);
+        return this->data_.at(T_index).at(index);
+    }
+
+    template <typename F>
+    void use_at(std::size_t index, F&& func) {
+        std::pair<std::size_t, std::size_t> index_map = this->index_map_.at(index);
+        VARIANT& obj = this->data_.at(index_map.first).at(index_map.second);
+        variant_unwrap<F,VARIANT>(std::forward<F>(func), obj);
     }
 
     template <typename T>
@@ -154,14 +178,9 @@ public:
         std::size_t T_index = assert_in_variant<VARIANT, T>();
 
         /* Insert the value */
-        this->_data.at(T_index).push_back(value);
-    }
-
-    template <typename T>
-    void pop_back(T value) {
-        std::size_t T_index = assert_in_variant<VARIANT, T>();
-
-        /* Remove the last value */
-        this->_data.at(T_index).pop_back(value);
+        std::size_t target_size = this->data_.at(T_index).size();
+        std::pair<std::size_t, std::size_t> index_pair(T_index, target_size);
+        this->index_map_.push_back(index_pair);
+        this->data_.at(T_index).push_back(value);
     }
 };

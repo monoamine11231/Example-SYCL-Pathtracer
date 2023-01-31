@@ -23,5 +23,10 @@ int main() {
 
     container.forEach([](auto a){ std::cout << a << std::endl; });
 
+    std::cout << std::endl << std::endl;
+
+    for (int i = 0; i < 10; i++) {
+        container.use_at(i, [](auto a) { std::cout << a << std::endl;});
+    }
     return 0;
 }

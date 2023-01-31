@@ -5,25 +5,20 @@
 #include "rapidobj/rapidobj.hpp"
 
 
-struct Material {                       /* Filament standard model material props */
-    sycl::vec<float, 3> baseColor;
+/* Strauss reflectance model */
+struct StraussMaterial {
+    sycl::vec<float, 3> color;
 
-    float               metallic;
-    float               roughness;
-    float               reflectance;
+    float               diffuse;
+    float               specular;
 
-    float               emissive;       /* Luminocity */
+    float               smoothness;
+    float               metalness;
+    float               transparency;
+    
+    float               ior;
 
-    float               transmission;   /* Transparency */
-
-    Material(sycl::vec<float, 3> baseColor,
-             float metallic, float roughness, float reflectance,
-             float emissive, float transmission)
-        : baseColor(baseColor), metallic(metallic), roughness(roughness),
-          reflectance(reflectance), emissive(emissive),
-          transmission(transmission) {};
-
-    Material(const rapidobj::Material& material);
+    StraussMaterial(const rapidobj::Material& material);
 };
 
 #endif PATHTRACER_INCLUDE_MATERIAL_H_
