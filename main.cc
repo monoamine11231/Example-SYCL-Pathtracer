@@ -1,32 +1,28 @@
 #include <iostream>
+#include <optional>
 #include <string>
+
 #include "include/variantcontainer.h"
 
-
-class A {};
-
 int main() {
-    using var = std::variant<int, std::string>;
+  using var = std::variant<int, float>;
 
-    VariantContainer<var> container{};
-    container.push_back(12);
-    container.push_back(22);
-    container.push_back(32);
-    container.push_back(42);
+  VariantContainer<var> container{};
+  container.push_back(12);
+  container.push_back(22);
+  container.push_back(32);
+  container.push_back(42);
 
-    container.push_back(std::string("aa"));
-    container.push_back(std::string("ba"));
-    container.push_back(std::string("ca"));
-    container.push_back(std::string("da"));
-    container.push_back(std::string("ea"));
-    container.push_back(std::string("fa"));
+  container.push_back(12.2f);
+  container.push_back(22.5f);
+  container.push_back(32.22f);
+  container.push_back(42.555f);
 
-    container.forEach([](auto a){ std::cout << a << std::endl; });
+  float sum = 0.0f;
+  auto a = [&sum](const auto &a) { sum += a; };
 
-    std::cout << std::endl << std::endl;
+  container.forEach(a);
 
-    for (int i = 0; i < 10; i++) {
-        container.use_at(i, [](auto a) { std::cout << a << std::endl;});
-    }
-    return 0;
+  std::cout << sum << std::endl;
+  return 0;
 }

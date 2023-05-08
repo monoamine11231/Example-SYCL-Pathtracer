@@ -10,6 +10,8 @@ project(pathtracer
 add_executable(pathtracer
     main.cc
     src/camera.cc
+    src/object.cc
+    src/material.cc
     src/objects/mesh.cc
     src/objects/plane.cc
     src/objects/sphere.cc
