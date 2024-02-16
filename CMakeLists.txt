@@ -9,15 +9,13 @@ project(pathtracer
 
 add_executable(pathtracer
     main.cc
+    src/utils.cc
     src/camera.cc
     src/object.cc
     src/material.cc
-    src/objects/mesh.cc
     src/objects/plane.cc
-    src/objects/sphere.cc
-    include/variantcontainer.h)
+    src/objects/sphere.cc)
 
 target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include ${HOME}/local/include/)
 find_package(RapidObj REQUIRED HINTS $ENV{HOME}/local/cmake)
-target_compile_options(pathtracer PRIVATE -fsycl -std=c++17 -I./ -Wall -Wextra -g)
-target_link_libraries(pathtracer PRIVATE rapidobj::rapidobj)
+target_compile_options(pathtracer PRIVATE -fsycl -std=c++20 -I./ -Wall -Wextra -g)
