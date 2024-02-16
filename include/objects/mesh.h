@@ -22,7 +22,7 @@ class MeshTriangle {
                uint8_t material_id)
       : a_(a), b_(b), c_(c), normal_(normal), material_id_(material_id){};
 
-  std::optional<Intersector> Intersect(const Ray& ray) const;
+  SYCL_EXTERNAL std::optional<Intersector> Intersect(const Ray& ray) const;
 };
 
 class Mesh {
@@ -31,7 +31,7 @@ class Mesh {
 
   Mesh(const rapidobj::Shape& shape, const rapidobj::Attributes& attributes);
 
-  std::optional<Intersector> Intersect(const Ray& ray) const;
+  SYCL_EXTERNAL std::optional<Intersector> Intersect(const Ray& ray) const;
 };
 
 #endif

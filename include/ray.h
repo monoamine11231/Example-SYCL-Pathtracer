@@ -7,8 +7,12 @@ struct Ray {
   sycl::vec<float, 3> origin;
   sycl::vec<float, 3> dir; /* Normalized direction vector */
 
+  uint8_t depth;
+
   Ray(sycl::vec<float, 3> origin, sycl::vec<float, 3> dir)
-      : origin(origin), dir(dir){};
+      : origin(origin), dir(dir), depth(0){};
+
+  SYCL_EXTERNAL Ray(){};
 };
 
 struct Intersector {

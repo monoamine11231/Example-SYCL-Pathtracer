@@ -13,10 +13,10 @@ class Sphere {
   uint8_t material_id_;
 
  public:
-  Sphere(sycl::vec<float, 3> origin, float radius, uint8_t material_id)
+  SYCL_EXTERNAL Sphere(sycl::vec<float, 3> origin, float radius, uint8_t material_id)
       : origin_(origin), radius_(radius), material_id_(material_id){};
 
-  std::optional<Intersector> Intersect(const Ray& ray) const;
+  SYCL_EXTERNAL std::optional<Intersector> Intersect(const Ray& ray) const;
 };
 
 #endif

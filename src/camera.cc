@@ -50,6 +50,15 @@ Camera::Camera(sycl::vec<float, 3> dir, sycl::vec<float, 3> origin,
   this->LookAt(dir, up);
 }
 
+void Camera::GenerateRay(uint16_t w, uint16_t h, Ray& ray) const {
+  sycl::vec<float, 3> dir = this->image_corner_ +
+                            this->right_ * this->w_factor_ * w -
+                            this->up_ * this->h_factor_ * h;
+
+  ray.dir = sycl::normalize(dir);
+  ray.origin = this->origin_;
+}
+
 void Camera::UpdateFOV(float fov) {
   this->fov_ = fov;
 

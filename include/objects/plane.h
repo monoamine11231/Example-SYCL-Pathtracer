@@ -17,7 +17,7 @@ class Plane {
         uint8_t material_id)
       : point_(point), normal_(normal), material_id_(material_id){};
 
-  std::optional<Intersector> Intersect(const Ray& ray) const;
+  SYCL_EXTERNAL std::optional<Intersector> Intersect(const Ray& ray) const;
 };
 
 #endif

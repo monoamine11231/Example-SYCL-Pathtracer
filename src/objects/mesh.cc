@@ -100,7 +100,7 @@ std::optional<Intersector> Mesh::Intersect(const Ray& ray) const {
       continue;
     }
 
-    if (new_intersection.value().t < intersection.value().t) {
+    if (new_intersection->t < intersection->t) {
       intersection = new_intersection;
     }
   }

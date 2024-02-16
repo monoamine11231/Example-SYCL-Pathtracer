@@ -2,8 +2,8 @@
 
 /* Returns the closest intersection for the ray in the vector of given objects,
  * if exists */
-std::optional<Intersector> closest_obj(const Ray &ray,
-                                       const VariantContainer<obj> &objects) {
+std::optional<Intersector> closest_obj(
+    const Ray &ray, const containerutils::VariantContainer<Objects> &objects) {
   std::optional<Intersector> global_intersection{};
   /* Lambda that checks and overwrites `global_intersection` if the given object
    * has a closer intersection than the previous one */
