@@ -11,8 +11,9 @@
 using Pixel = sycl::vec<float, 3>;
 using Objects = std::variant<Sphere, Plane>;
 
-const uint16_t kImageWidth = 512;
-const uint16_t kImageHeight = 1024;
+
+const uint16_t kImageWidth = 1024;
+const uint16_t kImageHeight = 512;
 
 /* Antialiasing block */
 const uint8_t kAABlockWidth = 2;
@@ -44,29 +45,41 @@ int main() {
   // std::cout << sum << std::endl;
 
   /* Construct objects that are shared between host and device */
-  sycl::queue q;
+  sycl::queue q(sycl::gpu_selector_v);
 
+  auto* camera_mem = sycl::malloc_shared<Camera>(1, q);
+  auto* container_mem =
+      sycl::malloc_shared<containerutils::VariantContainer<Objects>>(1, q);
+
+  /* Placement new to use allocated memory by SYCL to construct a class */
+  Camera* camera =
+      new (camera_mem) Camera(sycl::vec<float, 3>(1.0f, 0.0f, 0.0f),
+                              sycl::vec<float, 3>(0.0f, 0.0f, 0.0f),
+                              sycl::vec<float, 3>(0.0f, 0.0f, 1.0f), 90.0f,
+                              1.0f, kImageWidth, kImageHeight);
+  containerutils::VariantContainer<Objects>* objects =
+      new (container_mem) containerutils::VariantContainer<Objects>();
+
+  objects->push_back(
+      Sphere(
+        sycl::vec<float, 3>(10.0f, 0.0f, 0.0f),
+        2.0f, 0));
+
+  objects->push_back(
+      Sphere(
+        sycl::vec<float, 3>(10.0f, 5.0f, 0.0f),
+        1.0f, 0));
+
+  objects->push_back(
+      Plane(
+        sycl::vec<float, 3>(10.0f, 0.0f, 0.0f),
+        sycl::vec<float, 3>(0.05f, 0.0f, 2.0f),
+        0));
+  Pixel* image = sycl::malloc_shared<Pixel>(kImageWidth * kImageHeight, q);
   /* Placing everything in a scope forces host to wait for everything to
    * complete */
   {
-    auto* camera_mem = sycl::malloc_shared<Camera>(1, q);
-    auto* container_mem =
-        sycl::malloc_shared<containerutils::VariantContainer<Objects>>(1, q);
 
-    /* Placement new to use allocated memory by SYCL to construct a class */
-    Camera* camera =
-        new (camera_mem) Camera(sycl::vec<float, 3>(1.0f, 0.0f, 0.0f),
-                                sycl::vec<float, 3>(0.0f, 0.0f, 0.0f),
-                                sycl::vec<float, 3>(0.0f, 0.0f, 1.0f), 90.0f,
-                                1.0f, kImageHeight, kImageWidth);
-    containerutils::VariantContainer<Objects>* objects =
-        new (container_mem) containerutils::VariantContainer<Objects>();
-
-    objects->push_back(
-        Sphere(
-          sycl::vec<float, 3>(10.0f, 0.0f, 0.0f),
-          2.0f, 0));
-    Pixel* image = sycl::malloc_shared<Pixel>(kImageWidth * kImageHeight, q);
 
     /* Path tracer program */
     auto pathtracer = [=](sycl::item<2> it) {
@@ -80,21 +93,32 @@ int main() {
         /* Copy the ray for each sample */
         Ray ray = global_ray;
 
-        while (ray.depth < kMaxRayDepth) {
+          image[kImageWidth*h+w].z() = 1.0f;
           auto obj = closest_obj(ray, *objects);
           if (!obj.has_value()) break;
-        }
+          image[kImageWidth*h+w].x() = 1.0f;
       }
     };
-
     q.submit([&](sycl::handler& h) {
       h.parallel_for(sycl::range(kImageWidth, kImageHeight), pathtracer);
-    });
-
-    sycl::free(camera_mem, q);
-    sycl::free(container_mem, q);
-    sycl::free(image, q);
+    }).wait();
   }
+
+  printf("P3\n%d %d\n255\n", kImageWidth, kImageHeight);
+  for (int y = kImageHeight - 1; y >= 0; --y) {
+    for (int x = 0; x < kImageWidth; ++x) {
+      int id = y*kImageWidth+x,r,g,b;
+      r = static_cast<int>(255.99*image[id].x());
+      g = static_cast<int>(255.99*image[id].y());
+      b = static_cast<int>(255.99*image[id].z());
+
+      printf("%d %d %d\n",r,g,b);
+    }
+  }
+
+  sycl::free(camera_mem, q);
+  sycl::free(container_mem, q);
+  sycl::free(image, q);
 
   return 0;
 }

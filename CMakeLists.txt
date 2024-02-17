@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsycl")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsycl -fsycl-targets=nvptx64-nvidia-cuda -I./ -Wall -Wextra")
 
 project(pathtracer
     VERSION 1.0
@@ -18,4 +18,3 @@ add_executable(pathtracer
     src/objects/sphere.cc)
 
 target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include ${HOME}/local/include/)
-target_compile_options(pathtracer PRIVATE -fsycl -std=c++20 -I./ -Wall -Wextra -g)
