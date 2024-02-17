@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
+set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsycl")
 
 project(pathtracer
@@ -17,5 +18,4 @@ add_executable(pathtracer
     src/objects/sphere.cc)
 
 target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include ${HOME}/local/include/)
-find_package(RapidObj REQUIRED HINTS $ENV{HOME}/local/cmake)
 target_compile_options(pathtracer PRIVATE -fsycl -std=c++20 -I./ -Wall -Wextra -g)
