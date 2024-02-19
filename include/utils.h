@@ -144,7 +144,6 @@ class VariantContainer {
   /* Holding an individual vector for each type */
   StackVector<VARIANT, kStackVectorCapacity>
       data_[std::variant_size_v<VARIANT>];
-  // std::vector<std::pair<std::size_t, std::size_t>> index_map_;
 
  public:
   SYCL_EXTERNAL VariantContainer() : data_{} {};
@@ -192,21 +191,9 @@ class VariantContainer {
     return this->data_[T_index].at(index);
   }
 
-  template <typename F>
-  SYCL_EXTERNAL void use_at(std::size_t index, F&& func) const {
-    std::pair<std::size_t, std::size_t> index_map = this->index_map_.at(index);
-    VARIANT& obj = this->data_[index_map.first].at(index_map.second);
-    variant_unwrap<F, VARIANT>(std::forward<F>(func), obj);
-  }
-
   template <typename T>
   SYCL_EXTERNAL void push_back(T value) {
     std::size_t T_index = assert_in_variant<VARIANT, T>();
-
-    /* Insert the value */
-    std::size_t target_size = this->data_[T_index].size();
-    // std::pair<std::size_t, std::size_t> index_pair(T_index, target_size);
-    // this->index_map_.push_back_if(index_pair);
     this->data_[T_index].push_back_if(value);
   }
 };
