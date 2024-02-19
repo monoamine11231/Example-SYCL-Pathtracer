@@ -17,4 +17,8 @@ add_executable(pathtracer
     src/objects/plane.cc
     src/objects/sphere.cc)
 
+find_package(CUDA REQUIRED)
+include_directories("${CUDA_INCLUDE_DIRS}")
+
 target_include_directories(pathtracer PRIVATE ${DPCPP_HOME}/llvm/build/install/include ${HOME}/local/include/)
+target_link_libraries(pathtracer PRIVATE "-lglfw" PRIVATE "-lGL" PRIVATE "-lGLEW" PRIVATE "${CUDA_LIBRARIES}")
