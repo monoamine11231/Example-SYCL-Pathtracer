@@ -3,12 +3,10 @@
 #include <cmath>
 
 void Camera::GenerateWorkVariables() {
-  sycl::vec<float, 3> forward, image_center;
+  sycl::vec<float, 3> image_center;
   float aspect_ratio, fov_tan, image_width, image_height;
 
   aspect_ratio = (float)this->pheight_ / (float)this->pwidth_;
-
-  forward = this->dir_ * -1.0f;
 
   fov_tan = std::tan((this->fov_ / 360.0f) * M_PI);
 
@@ -28,8 +26,8 @@ void Camera::GenerateWorkVariables() {
 void Camera::LookAt(sycl::vec<float, 3> dir, const sycl::vec<float, 3>& up) {
   this->dir_ = dir;
 
-  this->right_ = sycl::cross(up, this->dir_ * -1.0f);
-  this->up_ = sycl::cross(this->dir_ * -1.0f, this->right_);
+  this->right_ = sycl::normalize(sycl::cross(this->dir_, up));
+  this->up_ = -sycl::normalize(sycl::cross(this->dir_, this->right_));
 
   this->GenerateWorkVariables();
 }
@@ -50,7 +48,10 @@ Camera::Camera(sycl::vec<float, 3> dir, sycl::vec<float, 3> origin,
   this->LookAt(dir, up);
 }
 
-void Camera::GenerateRay(uint16_t w, uint16_t h, Ray& ray) const {
+void Camera::GenerateRay(int w, int h, Ray& ray) const {
+  /* OpenGL buffers start from bottom left corner */
+  h = this->pheight_ - h;
+
   sycl::vec<float, 3> dir = this->image_corner_ +
                             this->right_ * this->w_factor_ * w -
                             this->up_ * this->h_factor_ * h;
@@ -76,4 +77,16 @@ void Camera::UpdateDimensions(uint16_t pwidth, uint16_t pheight) {
   this->pheight_ = pheight;
 
   this->GenerateWorkVariables();
+}
+
+sycl::vec<float, 3> Camera::GetFront() const {
+  return this->dir_;
+}
+
+sycl::vec<float, 3> Camera::GetRight() const {
+  return this->right_;
+}
+
+sycl::vec<float, 3> Camera::GetUp() const {
+  return this->up_;
 }
