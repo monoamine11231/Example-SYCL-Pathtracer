@@ -27,24 +27,25 @@
 
 using Objects = std::variant<Sphere, Plane>;
 
-const uint16_t kImageWidth = 1024;
-const uint16_t kImageHeight = 512;
+const int kImageWidth = 1024;
+const int kImageHeight = 512;
 
 /* Antialiasing block */
-const uint8_t kAABlockWidth = 2;
-const uint8_t kAABlockHeight = 2;
+const int kAABlockWidth = 2;
+const int kAABlockHeight = 2;
 
-const uint32_t kSamplesPerPixel = 1024;
+const int kSamplesPerPixel = 1024;
 
-const uint8_t kMaxRayDepth = 5;
+const int kMaxRayDepth = 5;
 
 
 Camera* camera_glb;
 const float kCameraStep = 0.1f;
 
 
-static void camera_keyback(GLFWwindow *window, int key, int scancode, int action,
-  int mods) {
+static void camera_keyback([[maybe_unused]] GLFWwindow *window, int key,
+  [[maybe_unused]] int scancode, [[maybe_unused]] int action,
+  [[maybe_unused]] int mods) {
   
   switch (key) {
   case GLFW_KEY_W:
