@@ -3,7 +3,7 @@
 #include <sycl/sycl.hpp>
 
 std::optional<Intersector> Sphere::Intersect(const Ray& ray) const {
-  std::optional<Intersector> intersection;
+  std::optional<Intersector> intersection{};
 
   sycl::vec<float, 3> v, normal;
   float a, b, c, D, t;

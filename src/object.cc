@@ -9,7 +9,8 @@ std::optional<Intersector> closest_obj(
    * has a closer intersection than the previous one */
   auto evaluator = [&ray, &global_intersection](const auto &obj) {
     std::optional<Intersector> intersection = obj.Intersect(ray);
-    if (!intersection.has_value()) return;
+    if (!intersection.has_value())
+      return;
 
     if (!global_intersection.has_value()) {
       global_intersection = intersection;
