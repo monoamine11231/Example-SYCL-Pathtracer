@@ -2,16 +2,20 @@
 #define PATHTRACER_INCLUDE_UTILS_H_
 
 #include <array>
-#include <sycl/sycl.hpp>
-#include <type_traits>
-#include <variant>
 #include <vector>
+#include <variant>
+#include <type_traits>
+
+#include <cstdint>
+
+#include <sycl/sycl.hpp>
+
 
 const int kStackVectorCapacity = 32;
 
 namespace vecutils {
-template <typename T, std::size_t N>
-inline sycl::vec<T, N> Lerp(const sycl::vec<T, N>& a, const sycl::vec<T, N>& b,
+template <typename T>
+SYCL_EXTERNAL sycl::vec<T,3> Lerp(const sycl::vec<T,3>& a, const sycl::vec<T,3>& b,
                             float r) {
   return a + (b - a) * r;
 }
@@ -19,18 +23,32 @@ inline sycl::vec<T, N> Lerp(const sycl::vec<T, N>& a, const sycl::vec<T, N>& b,
 /* Calculates 2 orthogonal vectors parallel to the plane with the normal vector
  * `n` */
 template <typename T>
-void PlaneVectors(const sycl::vec<T, 3>& n, sycl::vec<T, 3>& u,
+SYCL_EXTERNAL void PlaneVectors(const sycl::vec<T, 3>& n, sycl::vec<T, 3>& u,
                   sycl::vec<T, 3>& v) {
-  sycl::vec<T, 3> up = std::fabs(n.z) < 0.999
+  sycl::vec<T, 3> up = std::fabs(n.z()) < 0.999
                            ? sycl::vec<T, 3>{T(0), T(0), T(1)}
-                           : sycl::vec<T, 3>{T(1), T(0), T(0)};
+                           : ((std::fabs(n.y() < 0.999))
+                              ? sycl::vec<T, 3>{T(0), T(1), T(0)}
+                              : sycl::vec<T, 3>(T(1), T(0), T(0)));
   u = sycl::normalize(sycl::cross(up, n));
-  v = sycl::cross(n, u);
+  v = sycl::normalize(sycl::cross(n, u));
 }
 };  // namespace vecutils
 
 namespace miscutils {
-int ShadowFactor(float a);
+SYCL_EXTERNAL int ShadowFactor(float a);
+
+class XorShiftPRNG {
+private:
+  uint64_t state_;
+
+public:
+  SYCL_EXTERNAL XorShiftPRNG(uint64_t seed) : state_(seed) {};
+
+  SYCL_EXTERNAL double operator()();
+};
+
+SYCL_EXTERNAL uint64_t Hash64(uint64_t i);
 };  // namespace miscutils
 
 namespace containerutils {
