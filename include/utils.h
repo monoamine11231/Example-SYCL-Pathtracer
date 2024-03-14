@@ -163,8 +163,11 @@ class VariantContainer {
   StackVector<VARIANT, kStackVectorCapacity>
       data_[std::variant_size_v<VARIANT>];
 
+  StackVector<VARIANT*, kStackVectorCapacity * std::variant_size_v<VARIANT>>
+      lookup_;
+
  public:
-  SYCL_EXTERNAL VariantContainer() : data_{} {};
+  SYCL_EXTERNAL VariantContainer() : data_{}, lookup_{} {};
 
   /*  Because `std::get<T>` in `variant_iterator` has to accept a constexpr
       index we cannot simply use a for loop through to go through all types
@@ -193,9 +196,22 @@ class VariantContainer {
       for (std::size_t i = 0; i < this->data_[I].size(); i++) {
         /* We use noexcept `std::get_if` because we can guarantee that variant
          * indexes out of bounds are not possible */
-        func(*std::get_if<I>(&(this->data_[I].at(i))));
+        func(*std::get_if<I>(&this->data_[I].at(i)));
       }
       forEach<F, I + 1>(std::forward<F>(func));
+    } else {
+      return;
+    }
+  }
+
+  template <typename F, std::size_t I = 0>
+  SYCL_EXTERNAL void useAt(F&& func, std::size_t index) {
+    if constexpr (I < std::variant_size_v<VARIANT>) {
+      if (std::get_if<I>(this->lookup_[index]) == nullptr) {
+        useAt<F, I+1>(std::forward<F>(func), index);
+      } else {
+        func(*std::get_if<I>(this->lookup_[index]));
+      }
     } else {
       return;
     }
@@ -212,7 +228,10 @@ class VariantContainer {
   template <typename T>
   SYCL_EXTERNAL void push_back(T value) {
     std::size_t T_index = assert_in_variant<VARIANT, T>();
-    this->data_[T_index].push_back_if(value);
+    if (this->data_[T_index].push_back_if(value)) {
+      VARIANT &last = this->data_[T_index].at(this->data_[T_index].size()-1);
+      this->lookup_.push_back_if(std::addressof(last));
+    }
   }
 };
 }  // namespace containerutils
